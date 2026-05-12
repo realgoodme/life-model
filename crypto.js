@@ -1,0 +1,120 @@
+// ============================================================
+// 加密模块 — SHA-256 + 密钥管理
+// ============================================================
+
+const CRYPTO_KEY = 'life_model_admin_v2';
+
+// 密钥SHA-256哈希
+async function sha256(str) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// 检查是否已登录
+function isLoggedIn() {
+  return sessionStorage.getItem('life_admin_auth') === '1';
+}
+
+// 获取保存的密钥hash
+function getSavedKeyHash() {
+  return localStorage.getItem('life_model_key_hash') || '';
+}
+
+// 验证密钥
+async function verifyKey(inputKey) {
+  const hash = await sha256(inputKey + CRYPTO_KEY);
+  const savedHash = getSavedKeyHash();
+  // 如果从未设置过，使用默认密钥
+  if (!savedHash) {
+    const defaultHash = await sha256('admin2026' + CRYPTO_KEY);
+    return hash === defaultHash;
+  }
+  return hash === savedHash;
+}
+
+// 设置密钥
+async function setKey(newKey) {
+  const hash = await sha256(newKey + CRYPTO_KEY);
+  localStorage.setItem('life_model_key_hash', hash);
+}
+
+// 显示修改密钥弹窗
+function showChangeKey() {
+  const newKey = prompt('请输入新密钥（6位以上）：');
+  if (!newKey || newKey.length < 6) {
+    showToast('密钥长度至少6位');
+    return;
+  }
+  setKey(newKey).then(() => {
+    document.getElementById('default-key').textContent = '******';
+    showToast('密钥已修改，请记住新密钥！');
+  });
+}
+
+// 登录
+async function doLogin() {
+  const keyInput = document.getElementById('login-key');
+  const errorEl = document.getElementById('login-error');
+  const key = keyInput.value.trim();
+
+  if (!key) {
+    errorEl.textContent = '请输入密钥';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  const valid = await verifyKey(key);
+  if (valid) {
+    sessionStorage.setItem('life_admin_auth', '1');
+    sessionStorage.setItem('life_admin_login_time', new Date().toLocaleString('zh-CN'));
+    showToast('登录成功！');
+    renderAdmin();
+    showPage('page-admin');
+  } else {
+    errorEl.textContent = '密钥错误，请重试';
+    errorEl.classList.add('show');
+    keyInput.value = '';
+    keyInput.focus();
+  }
+}
+
+// 登出
+function doLogout() {
+  sessionStorage.removeItem('life_admin_auth');
+  sessionStorage.removeItem('life_admin_login_time');
+  showToast('已退出登录');
+  goHome();
+}
+
+// 尝试进入后台
+function goLogin() {
+  if (isLoggedIn()) {
+    renderAdmin();
+    showPage('page-admin');
+  } else {
+    showPage('page-login');
+    document.getElementById('login-key').value = '';
+    document.getElementById('login-error').classList.remove('show');
+    document.getElementById('login-key').focus();
+  }
+}
+
+// 数据加密存储（可选增强版）
+function encryptData(data) {
+  try {
+    return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  } catch {
+    return JSON.stringify(data);
+  }
+}
+
+function decryptData(str) {
+  try {
+    return JSON.parse(decodeURIComponent(escape(atob(str))));
+  } catch {
+    return [];
+  }
+}
