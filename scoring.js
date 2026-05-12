@@ -349,17 +349,26 @@ function generateProbTimeline(result) {
   try {
   const { predictions } = result;
 
-  let html = '';
-  html += '<div class="prob-row"><div class="prob-label">收入水平</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.income + '%">' + predictions.income + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">阶层位置</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.class + '%">' + predictions.class + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">身心健康</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.healthScore + '%">' + predictions.healthScore + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">机遇把握</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.actionScore + '%">' + predictions.actionScore + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">职场稳定性</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.stability + '%">' + predictions.stability + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">晋升潜力</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.promotion + '%">' + predictions.promotion + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">抗压韧性</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.stress + '%">' + predictions.stress + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">婚恋关系</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.marriage + '%">' + predictions.marriage + '%</div></div></div>';
+  const items = [
+    { label: '💰 收入水平', value: predictions.income, cls: 'prob-bar-income' },
+    { label: '🏆 阶层位置', value: predictions.class, cls: 'prob-bar-class' },
+    { label: '❤️ 身心健康', value: predictions.healthScore, cls: 'prob-bar-health' },
+    { label: '⚡ 机遇把握', value: predictions.actionScore, cls: 'prob-bar-action' },
+    { label: '🛡️ 职场稳定', value: predictions.stability, cls: 'prob-bar-stability' },
+    { label: '📈 晋升潜力', value: predictions.promotion, cls: 'prob-bar-promotion' },
+    { label: '💪 抗压韧性', value: predictions.stress, cls: 'prob-bar-stress' },
+    { label: '💑 婚恋关系', value: predictions.marriage, cls: 'prob-bar-marriage' }
+  ];
 
-  return html;
+  return items.map(item => `
+    <div class="prob-row">
+      <div class="prob-label">${item.label}</div>
+      <div class="prob-bar-bg">
+        <div class="prob-bar-fill ${item.cls}" style="width:${item.value}%">${item.value}%</div>
+      </div>
+      <div class="prob-value">${item.value}%</div>
+    </div>
+  `).join('');
   } catch(e) {
     console.error('generateProbTimeline错误:', e);
     return '<div style="padding:20px;text-align:center;color:#FF6B8A">生成时间轴时出错: ' + e.message + '</div>';
@@ -372,27 +381,51 @@ function generateSuggestions(result) {
   const sugs = [];
 
   if (dimScores.birth < 45) {
-    sugs.push({ icon: '🏗️', title: '主动构建社会资本网络', desc: '加入行业协会、职业社群、高质量校友网络。' });
+    sugs.push({
+      icon: '🏗️',
+      title: '主动构建社会资本网络',
+      desc: '①每周至少参加1次行业活动/线下聚会，主动与3位陌生人交换联系方式。②每月选定1位你欣赏的同行，发送个性化问候消息（避免群发）。③加入2个高质量付费社群，每周至少贡献1条有价值的发言。④每季度约见1位在你目标领域有影响力的人物，争取面谈机会。'
+    });
   }
 
   if (dimScores.family < 50) {
-    sugs.push({ icon: '🧘', title: '系统化修复情感根基', desc: '通过心理咨询或正念训练，系统性重建安全的内在工作模型。' });
+    sugs.push({
+      icon: '🧘',
+      title: '系统化修复情感根基',
+      desc: '①先做寸UC心理咨询或量表（如ECR-R依恋量表）评估当前依恋模式，明确具体修复方向。②每天进行5分钟正念冥想（推荐APP：Insight Timer），专注呼吸，持续8周。③每周与1位值得信赖的朋友/伴侣进行1次深度对话（不少于30分钟），练习情感表达与被接住的体验。④记录每次冲突后的情绪反应模式，6周后复盘，观察自动化反应是否减弱。'
+    });
   }
 
   if (dimScores.talent < 50) {
-    sugs.push({ icon: '📚', title: '聚焦单点，构建专家护城河', desc: '天赋一般的情况下，策略是找到1个具体领域进行10,000小时以上的刻意练习。' });
+    sugs.push({
+      icon: '📚',
+      title: '聚焦单点，构建专家护城河',
+      desc: '①选定1个具体领域（必须是可积累、可验证的技能，如数据分析、UX设计、Python编程）。②在该领域找到1位导师或榜样，研究他的成长路径。③制定"100小时突破计划"：每周投入至少10小时，前100小时专注基础技能，后500小时专攻专项能力。④每季度末进行1次自我评估，发布作品到GitHub/Behance等公开平台获取反馈。'
+    });
   }
 
   if (dimScores.health < 50) {
-    sugs.push({ icon: '🏥', title: '立即启动健康资本投资计划', desc: '健康管理是最高ROI的人生投资。' });
+    sugs.push({
+      icon: '🏥',
+      title: '立即启动健康资本投资计划',
+      desc: '①将每周3次、每次30分钟有氧运动（快走/跑步/游泳）写入日历，设为不可取消的固定日程。②优先改善睡眠：固定起床时间（误差不超过30分钟），睡前1小时停止刷手机。③每月安排1次全面体检或专项检查，及早发现及早干预。④每天保证7-8小时睡眠+150分钟运动，研究显示此组合可使工作记忆提升约19%。'
+    });
   }
 
   if (dimScores.action < 45) {
-    sugs.push({ icon: '⚡', title: '训练决策速度，克服行动瘫痪', desc: '采用70%信息决策法则，配合5秒法则。' });
+    sugs.push({
+      icon: '⚡',
+      title: '训练决策速度，克服行动瘫痪',
+      desc: '①强制使用"70%信息决策法"：当你认为自己需要更多信息时，强迫自己在现有信息下做出决定。②应用5秒法则（Mel Robbins）：决定行动后5秒内不行动就会永远不行动，给自己设手机倒计时强迫启动。③设置"48小时决策截止"：任何需要做的事必须在48小时内给出行动方案或明确拒绝。④把大目标拆解为"能在48小时内完成的第一步"，如"先只做5分钟"。'
+    });
   }
 
   if (sugs.length === 0) {
-    sugs.push({ icon: '✨', title: '保持综合优势，持续精进', desc: '你的先天参数已经相当均衡优秀。' });
+    sugs.push({
+      icon: '✨',
+      title: '保持综合优势，持续精进',
+      desc: '①每季度学习1项跨领域新技能。②主动承担有挑战性的项目，扩展能力边界。③建立定期复盘习惯，每月进行1次人生战略review。'
+    });
   }
 
   return sugs;
@@ -400,4 +433,41 @@ function generateSuggestions(result) {
     console.error('generateSuggestions错误:', e);
     return [{ icon: '⚠️', title: '建议生成出错', desc: '生成建议时出错: ' + e.message }];
   }
+}
+
+// ---- 分享数据编码/解码 ----
+function encodeShareData(result, name) {
+  // 将结果编码为 URL 安全字符串
+  const data = {
+    n: name,
+    t: result.total,
+    d: result.dimScores,
+    l: getLevel(result.total).level,
+    ln: getLevel(result.total).name
+  };
+  try {
+    const json = JSON.stringify(data);
+    // 使用 base64 编码（浏览器原生 atob/btoa）
+    return btoa(unescape(encodeURIComponent(json)));
+  } catch(e) {
+    console.error('编码分享数据失败:', e);
+    return null;
+  }
+}
+
+function decodeShareData(encoded) {
+  try {
+    const json = decodeURIComponent(escape(atob(encoded)));
+    return JSON.parse(json);
+  } catch(e) {
+    console.error('解码分享数据失败:', e);
+    return null;
+  }
+}
+
+function getShareUrl(result, name) {
+  const encoded = encodeShareData(result, name);
+  if (!encoded) return null;
+  const baseUrl = window.location.origin + window.location.pathname;
+  return baseUrl + '?share=' + encoded;
 }
