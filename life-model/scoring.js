@@ -349,17 +349,26 @@ function generateProbTimeline(result) {
   try {
   const { predictions } = result;
 
-  let html = '';
-  html += '<div class="prob-row"><div class="prob-label">收入水平</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.income + '%">' + predictions.income + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">阶层位置</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.class + '%">' + predictions.class + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">身心健康</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.healthScore + '%">' + predictions.healthScore + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">机遇把握</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.actionScore + '%">' + predictions.actionScore + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">职场稳定性</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.stability + '%">' + predictions.stability + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">晋升潜力</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.promotion + '%">' + predictions.promotion + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">抗压韧性</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.stress + '%">' + predictions.stress + '%</div></div></div>';
-  html += '<div class="prob-row"><div class="prob-label">婚恋关系</div><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + predictions.marriage + '%">' + predictions.marriage + '%</div></div></div>';
+  const items = [
+    { label: '💰 收入水平', value: predictions.income, cls: 'prob-bar-income' },
+    { label: '🏆 阶层位置', value: predictions.class, cls: 'prob-bar-class' },
+    { label: '❤️ 身心健康', value: predictions.healthScore, cls: 'prob-bar-health' },
+    { label: '⚡ 机遇把握', value: predictions.actionScore, cls: 'prob-bar-action' },
+    { label: '🛡️ 职场稳定', value: predictions.stability, cls: 'prob-bar-stability' },
+    { label: '📈 晋升潜力', value: predictions.promotion, cls: 'prob-bar-promotion' },
+    { label: '💪 抗压韧性', value: predictions.stress, cls: 'prob-bar-stress' },
+    { label: '💑 婚恋关系', value: predictions.marriage, cls: 'prob-bar-marriage' }
+  ];
 
-  return html;
+  return items.map(item => `
+    <div class="prob-row">
+      <div class="prob-label">${item.label}</div>
+      <div class="prob-bar-bg">
+        <div class="prob-bar-fill ${item.cls}" style="width:${item.value}%">${item.value}%</div>
+      </div>
+      <div class="prob-value">${item.value}%</div>
+    </div>
+  `).join('');
   } catch(e) {
     console.error('generateProbTimeline错误:', e);
     return '<div style="padding:20px;text-align:center;color:#FF6B8A">生成时间轴时出错: ' + e.message + '</div>';
