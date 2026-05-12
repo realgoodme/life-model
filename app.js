@@ -446,6 +446,7 @@ function renderAnalysisBlocks(blocks) {
       <div class="block-title">${b.title}</div>
       <div class="block-body">${b.content}</div>
       ${b.theory ? '<div class="theory-tag">📖 ' + b.theory + '</div>' : ''}
+      ${b.theoryDetail ? '<div class="theory-detail">' + b.theoryDetail + '</div>' : ''}
       ${b.yijing ? '<div class="yijing-wisdom">💎 ' + b.yijing + '</div>' : ''}
     </div>
   `).join('');
