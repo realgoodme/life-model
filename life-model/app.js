@@ -709,11 +709,256 @@ function exportCSV() {
 }
 
 // ---- 分享 ----
+let currentShareResult = null;
+let currentShareName = '';
+let qrcodeInstance = null;
+
 function shareResult() {
-  if (navigator.share) {
-    navigator.share({ title: '人生先天参数评分模型', text: document.getElementById('level-badge').textContent });
+  // 获取当前结果数据
+  const records = getRecords();
+  if (records.length === 0) {
+    showToast('暂无测评结果可分享');
+    return;
+  }
+  currentShareResult = records[0];
+  currentShareName = currentShareResult.name;
+  openShareModal();
+}
+
+function openShareModal() {
+  const modal = document.getElementById('share-modal');
+  const preview = document.getElementById('share-preview');
+  const level = getLevel(currentShareResult.total);
+
+  // 更新预览
+  preview.innerHTML = `
+    <div class="share-preview-name">${currentShareName} 的测评结果</div>
+    <div class="share-preview-score">${currentShareResult.total} 分</div>
+    <div class="share-preview-level" style="background:${level.color}">${level.level}级 · ${level.name}</div>
+  `;
+
+  modal.classList.add('show');
+  switchShareTab('image');
+}
+
+function closeShareModal() {
+  document.getElementById('share-modal').classList.remove('show');
+  // 清理二维码实例
+  if (qrcodeInstance) {
+    qrcodeInstance.clear();
+    qrcodeInstance = null;
+  }
+}
+
+function switchShareTab(tab) {
+  // 更新标签状态
+  document.querySelectorAll('.share-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+
+  // 更新内容显示
+  document.querySelectorAll('.share-tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('share-' + tab + '-tab').classList.add('active');
+
+  // 根据标签执行相应操作
+  if (tab === 'link') {
+    generateShareLink();
+  } else if (tab === 'qrcode') {
+    generateQRCode();
+  }
+}
+
+function generateShareImage() {
+  const preview = document.getElementById('share-image-preview');
+  preview.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2);">正在生成图片...</div>';
+  preview.classList.add('show');
+
+  // 创建用于生成图片的 DOM 结构
+  const shareCard = document.createElement('div');
+  shareCard.style.cssText = `
+    width: 400px;
+    padding: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    color: #fff;
+    text-align: center;
+  `;
+
+  const level = getLevel(currentShareResult.total);
+
+  shareCard.innerHTML = `
+    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">人生先天参数评分模型</div>
+    <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">${currentShareName}</div>
+    <div style="font-size: 64px; font-weight: 900; margin-bottom: 12px;">${currentShareResult.total}</div>
+    <div style="display: inline-block; padding: 6px 20px; background: rgba(255,255,255,0.2); border-radius: 999px; font-size: 14px; font-weight: bold; margin-bottom: 24px;">
+      ${level.level}级 · ${level.name}
+    </div>
+    <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
+      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
+        <div style="opacity: 0.8;">出身</div>
+        <div style="font-weight: bold;">${currentShareResult.dimScores.birth}</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
+        <div style="opacity: 0.8;">家庭</div>
+        <div style="font-weight: bold;">${currentShareResult.dimScores.family}</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
+        <div style="opacity: 0.8;">天赋</div>
+        <div style="font-weight: bold;">${currentShareResult.dimScores.talent}</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
+        <div style="opacity: 0.8;">性格</div>
+        <div style="font-weight: bold;">${currentShareResult.dimScores.character}</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
+        <div style="opacity: 0.8;">时代</div>
+        <div style="font-weight: bold;">${currentShareResult.dimScores.era}</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
+        <div style="opacity: 0.8;">健康</div>
+        <div style="font-weight: bold;">${currentShareResult.dimScores.health}</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
+        <div style="opacity: 0.8;">行动</div>
+        <div style="font-weight: bold;">${currentShareResult.dimScores.action}</div>
+      </div>
+    </div>
+    <div style="font-size: 11px; opacity: 0.6;">长按识别二维码查看完整分析</div>
+  `;
+
+  document.body.appendChild(shareCard);
+
+  // 使用 html2canvas 生成图片
+  if (typeof html2canvas !== 'undefined') {
+    html2canvas(shareCard, {
+      backgroundColor: null,
+      scale: 2,
+      useCORS: true
+    }).then(canvas => {
+      document.body.removeChild(shareCard);
+
+      const imgData = canvas.toDataURL('image/png');
+      preview.innerHTML = `
+        <img src="${imgData}" alt="分享图片" />
+        <div class="share-image-actions">
+          <button class="btn-save-image" onclick="saveShareImage('${imgData}')">💾 保存图片</button>
+          <button class="btn-share-image" onclick="shareImageExternal('${imgData}')">📤 分享图片</button>
+        </div>
+      `;
+      preview.classList.add('show');
+    }).catch(err => {
+      document.body.removeChild(shareCard);
+      preview.innerHTML = '<div style="text-align:center;padding:20px;color:var(--red);">生成失败，请重试</div>';
+      console.error('html2canvas error:', err);
+    });
   } else {
-    navigator.clipboard.writeText(window.location.href).then(() => showToast('链接已复制！'));
+    document.body.removeChild(shareCard);
+    preview.innerHTML = '<div style="text-align:center;padding:20px;color:var(--red);">图片生成库加载失败</div>';
+  }
+}
+
+function saveShareImage(imgData) {
+  const link = document.createElement('a');
+  link.download = '人生测评结果_' + currentShareName + '_' + new Date().toLocaleDateString('zh-CN').replace(/\//g, '-') + '.png';
+  link.href = imgData;
+  link.click();
+  showToast('图片已保存');
+}
+
+function shareImageExternal(imgData) {
+  // 如果支持 Web Share API with files
+  if (navigator.share && navigator.canShare) {
+    fetch(imgData)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], 'share.png', { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: '人生先天参数测评结果',
+            text: currentShareName + '的测评结果：' + currentShareResult.total + '分'
+          });
+        } else {
+          copyImageToClipboard(imgData);
+        }
+      })
+      .catch(() => copyImageToClipboard(imgData));
+  } else {
+    copyImageToClipboard(imgData);
+  }
+}
+
+function copyImageToClipboard(imgData) {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.onload = function() {
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+    canvas.toBlob(blob => {
+      navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]).then(() => {
+        showToast('图片已复制到剪贴板');
+      }).catch(() => {
+        showToast('图片复制失败，请长按图片保存');
+      });
+    });
+  };
+  img.src = imgData;
+}
+
+function generateShareLink() {
+  const input = document.getElementById('share-link-input');
+  if (typeof getShareUrl === 'function') {
+    const url = getShareUrl(currentShareResult, currentShareName);
+    input.value = url || window.location.href;
+  } else {
+    input.value = window.location.href;
+  }
+}
+
+function copyShareLink() {
+  const input = document.getElementById('share-link-input');
+  input.select();
+  document.execCommand('copy');
+  showToast('链接已复制到剪贴板');
+}
+
+function generateQRCode() {
+  const container = document.getElementById('qrcode-container');
+  container.innerHTML = '';
+
+  const url = typeof getShareUrl === 'function'
+    ? getShareUrl(currentShareResult, currentShareName)
+    : window.location.href;
+
+  if (typeof QRCode !== 'undefined') {
+    qrcodeInstance = new QRCode(container, {
+      text: url,
+      width: 180,
+      height: 180,
+      colorDark: '#1A2040',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } else {
+    container.innerHTML = '<div style="text-align:center;color:var(--red);padding:20px;">二维码库加载失败</div>';
+  }
+}
+
+function downloadQRCode() {
+  const container = document.getElementById('qrcode-container');
+  const canvas = container.querySelector('canvas');
+  if (canvas) {
+    const link = document.createElement('a');
+    link.download = '测评结果二维码_' + currentShareName + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('二维码已下载');
+  } else {
+    showToast('请先生成二维码');
   }
 }
 
@@ -729,6 +974,22 @@ function showToast(msg) {
 
 // ---- 初始化 ----
 updateTotalCount();
+
+// 检查是否有分享数据
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const shareData = params.get('share');
+  if (shareData && typeof decodeShareData === 'function') {
+    const data = decodeShareData(shareData);
+    if (data) {
+      // 显示分享结果预览
+      setTimeout(() => {
+        showToast('收到 ' + data.n + ' 的分享！');
+        // 可以在这里显示一个分享结果预览弹窗
+      }, 500);
+    }
+  }
+})();
 
 // ---- 按钮事件绑定 ----
 (function() {
