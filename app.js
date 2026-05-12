@@ -967,11 +967,33 @@ function generateQRCode() {
   // 使用二维码
   if (typeof QRCode !== 'undefined') {
     try {
-      // 先清空容器所有内容
+      // 先清空容器
       container.innerHTML = '';
-      container.style.cssText = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px; border-radius: 16px; display: inline-block; box-shadow: 0 8px 32px rgba(102,126,234,0.3);';
 
-      qrcodeInstance = new QRCode(container, {
+      // 创建美化容器
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        padding: 24px;
+        border-radius: 20px;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 12px 40px rgba(102,126,234,0.4), 0 4px 12px rgba(0,0,0,0.1);
+        border: 3px solid rgba(255,255,255,0.3);
+      `;
+
+      // 顶部品牌标识
+      const brand = document.createElement('div');
+      brand.style.cssText = 'color: white; font-size: 12px; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.2); letter-spacing: 1px;';
+      brand.textContent = '🏛️ 人生先天参数';
+      wrapper.appendChild(brand);
+
+      // 二维码容器
+      const qrWrapper = document.createElement('div');
+      qrWrapper.style.cssText = 'background: white; padding: 10px; border-radius: 12px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);';
+      qrcodeInstance = new QRCode(qrWrapper, {
         text: url,
         width: 180,
         height: 180,
@@ -979,21 +1001,27 @@ function generateQRCode() {
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
       });
+      wrapper.appendChild(qrWrapper);
 
-      // 等待 QRCode 创建完成后，清理多余的子元素，只保留一个
+      // 底部提示
+      const tip = document.createElement('div');
+      tip.style.cssText = 'color: rgba(255,255,255,0.9); font-size: 11px; text-shadow: 0 1px 2px rgba(0,0,0,0.2);';
+      tip.textContent = '👆 扫码查看我的测评结果';
+      wrapper.appendChild(tip);
+
+      // 清理多余的子元素
       setTimeout(() => {
-        const children = container.children;
-        // 保留第一个子元素（img 或 canvas）
+        const children = qrWrapper.children;
         for (let i = children.length - 1; i > 0; i--) {
           children[i].remove();
         }
-        // 美化二维码
-        const firstChild = container.firstElementChild;
+        const firstChild = qrWrapper.firstElementChild;
         if (firstChild) {
-          firstChild.style.cssText = 'border-radius: 8px; background: white; padding: 6px; display: block; margin: 0 auto;';
+          firstChild.style.cssText = 'display: block; border-radius: 4px;';
         }
       }, 50);
 
+      container.appendChild(wrapper);
       console.log('[二维码] 生成成功');
     } catch(e) {
       console.error('[二维码] 生成失败:', e);
