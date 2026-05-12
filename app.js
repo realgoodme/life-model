@@ -937,6 +937,11 @@ function copyShareLink() {
 
 function generateQRCode() {
   const container = document.getElementById('qrcode-container');
+
+  // 修复：先移除旧标题，防止重复
+  const oldTitle = document.querySelector('.qrcode-title');
+  if (oldTitle) oldTitle.remove();
+
   container.innerHTML = '';
 
   // 生成标题
@@ -960,11 +965,11 @@ function generateQRCode() {
   }
 
   // 使用二维码
-  console.log('[二维码] QRCode 是否存在:', typeof QRCode !== 'undefined');
-  console.log('[二维码] 分享 URL:', url);
   if (typeof QRCode !== 'undefined') {
     try {
-      container.innerHTML = '';
+      // 美化：给容器添加样式
+      container.style.cssText = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 16px; display: inline-block; box-shadow: 0 8px 32px rgba(102,126,234,0.3);';
+
       qrcodeInstance = new QRCode(container, {
         text: url,
         width: 200,
@@ -973,6 +978,19 @@ function generateQRCode() {
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
       });
+
+      // 美化：二维码二维码添加圆角和白边
+      setTimeout(() => {
+        const qrImg = container.querySelector('img');
+        if (qrImg) {
+          qrImg.style.cssText = 'border-radius: 12px; background: white; padding: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);';
+        }
+        const qrCanvas = container.querySelector('canvas');
+        if (qrCanvas) {
+          qrCanvas.style.cssText = 'border-radius: 12px; background: white; padding: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);';
+        }
+      }, 100);
+
       console.log('[二维码] 生成成功');
     } catch(e) {
       console.error('[二维码] 生成失败:', e);
