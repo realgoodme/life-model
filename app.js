@@ -960,38 +960,46 @@ function generateQRCode() {
   }
 
   // 使用葵花码（彩色渐变二维码）
+  console.log('[葵花码] QRCodeStyling 是否存在:', typeof QRCodeStyling !== 'undefined');
+  console.log('[葵花码] 分享 URL:', url);
   if (typeof QRCodeStyling !== 'undefined') {
-    qrcodeInstance = new QRCodeStyling({
-      width: 220,
-      height: 220,
-      type: 'canvas',
-      data: url,
-      image: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iIzVmN2ZmZiIvPjxwYXRoIGQ9Ik0zMCA1MGgtNDB2NDBoNDB6Ii8+PHBhdGggZD0iTTcwIDUwaC00MHY0MGg0MHoiIGZpbGw9IiM3MmI1ZTAiLz48dGV4dCB4PSI1MCIgeT0iNTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQ9ImJvbGQiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiMxYTIwNDAiIHI9IjUuNSI+6YO15aW25aW2PC9wYXRoPjwvc3ZnPg==',
-      dotsOptions: {
-        color: '#1A2040',
-        type: 'rounded'
-      },
-      backgroundOptions: {
-        color: '#ffffff'
-      },
-      cornersSquareOptions: {
-        color: '#5B7FFF',
-        type: 'extra-rounded'
-      },
-      cornersDotOptions: {
-        color: '#FF6B8A',
-        type: 'dot'
-      },
-      imageOptions: {
-        crossOrigin: 'anonymous',
-        margin: 6,
-        imageSize: 0.25
-      }
-    });
-
-    qrcodeInstance.append(container);
+    try {
+      qrcodeInstance = new QRCodeStyling({
+        width: 220,
+        height: 220,
+        type: 'canvas',
+        data: url,
+        image: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iIzVmN2ZmZiIvPjxwYXRoIGQ9Ik0zMCA1MGgtNDB2NDBoNDB6Ii8+PHBhdGggZD0iTTcwIDUwaC00MHY0MGg0MHoiIGZpbGw9IiM3MmI1ZTAiLz48dGV4dCB4PSI1MCIgeT0iNTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQ9ImJvbGQiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiMxYTIwNDAiIHI9IjUuNSI+6YO15aW25aW2PC9wYXRoPjwvc3ZnPg==',
+        dotsOptions: {
+          color: '#1A2040',
+          type: 'rounded'
+        },
+        backgroundOptions: {
+          color: '#ffffff'
+        },
+        cornersSquareOptions: {
+          color: '#5B7FFF',
+          type: 'extra-rounded'
+        },
+        cornersDotOptions: {
+          color: '#FF6B8A',
+          type: 'dot'
+        },
+        imageOptions: {
+          crossOrigin: 'anonymous',
+          margin: 6,
+          imageSize: 0.25
+        }
+      });
+      qrcodeInstance.append(container);
+      console.log('[葵花码] 生成成功');
+    } catch(e) {
+      console.error('[葵花码] 生成失败:', e);
+      container.innerHTML = '<div style="text-align:center;color:var(--red);padding:20px;">二维码生成失败: ' + e.message + '</div>';
+    }
   } else {
-    container.innerHTML = '<div style="text-align:center;color:var(--red);padding:20px;">二维码库加载失败</div>';
+    console.error('[葵花码] QRCodeStyling 未定义，请检查 CDN 是否加载成功');
+    container.innerHTML = '<div style="text-align:center;color:var(--red);padding:20px;">二维码库加载失败，可能是网络问题</div>';
   }
 }
 
