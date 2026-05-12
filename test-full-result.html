@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试结果 - 人生先天参数评分模型</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%);
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .test-banner {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 12px 20px;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    .test-banner span { opacity: 0.9; }
+    
+    /* 结果页样式 */
+    .result-container {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #12122a;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    
+    .result-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .result-header h1 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .result-time {
+      font-size: 12px;
+      color: #5A6899;
+    }
+    
+    /* 总分环 */
+    .score-ring-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    canvas#score-ring { width: 160px; height: 160px; }
+    
+    /* 等级 */
+    .level-info {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #fff;
+    }
+    .level-desc {
+      font-size: 13px;
+      color: #5A6899;
+      margin-top: 8px;
+    }
+    .level-subinfo {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #8892BE;
+      flex-wrap: wrap;
+    }
+    .level-subinfo strong { color: #5B7FFF; }
+    
+    /* 雷达图 */
+    .radar-section {
+      margin: 24px 0;
+    }
+    .radar-section h3 {
+      font-size: 15px;
+      margin-bottom: 12px;
+      color: #8892BE;
+    }
+    .radar-container {
+      display: flex;
+      justify-content: center;
+    }
+    canvas#radar-chart { width: 280px; height: 280px; }
+    
+    /* 维度得分 */
+    .dim-scores {
+      margin: 24px 0;
+    }
+    .dim-score-row {
+      margin-bottom: 12px;
+    }
+    .dim-score-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .dim-bar-bg {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .dim-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s;
+    }
+    
+    /* 预测卡片 */
+    .prediction-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 24px 0;
+    }
+    .pred-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 14px;
+      border-left: 3px solid var(--pred-color, #5B7FFF);
+    }
+    .pred-icon { font-size: 18px; margin-bottom: 4px; }
+    .pred-label { font-size: 11px; color: #5A6899; margin-bottom: 6px; }
+    .pred-value { font-size: 16px; font-weight: bold; margin-bottom: 2px; }
+    .pred-sub { font-size: 10px; color: #5A6899; }
+    
+    /* 职场能力条 */
+    .career-bars { margin: 24px 0; }
+    .career-bars h3 { font-size: 15px; margin-bottom: 12px; color: #8892BE; }
+    .career-row { margin-bottom: 10px; }
+    .career-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .career-bar-bg {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .career-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+    
+    /* 分析报告 */
+    .analysis-section { margin: 24px 0; }
+    .analysis-section h3 { font-size: 15px; margin-bottom: 12px; color: #8892BE; }
+    .analysis-block {
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-left: 3px solid var(--block-color, #5B7FFF);
+    }
+    .block-title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: var(--block-color, #5B7FFF);
+    }
+    .block-body { font-size: 13px; line-height: 1.7; color: #8892BE; }
+    .theory-tag {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #A78BFA;
+      padding: 4px 10px;
+      background: rgba(167,139,250,0.1);
+      border-radius: 12px;
+      display: inline-block;
+    }
+    .yijing-wisdom {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #FFB347;
+      font-style: italic;
+    }
+    
+    /* 建议 */
+    .suggestions { margin: 24px 0; }
+    .suggestions h3 { font-size: 15px; margin-bottom: 12px; color: #8892BE; }
+    .sug-card {
+      display: flex;
+      gap: 12px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .sug-icon { font-size: 24px; }
+    .sug-body { flex: 1; }
+    .sug-body strong { font-size: 14px; display: block; margin-bottom: 8px; }
+    .sug-steps { display: flex; flex-direction: column; gap: 4px; }
+    .sug-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12px;
+      color: #8892BE;
+    }
+    .sug-step-num {
+      width: 18px;
+      height: 18px;
+      background: var(--block-color, #5B7FFF);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+    
+    /* 时间线 */
+    .prob-timeline { margin: 24px 0; }
+    .prob-timeline h3 { font-size: 15px; margin-bottom: 12px; color: #8892BE; }
+    .timeline-content {
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 12px;
+      line-height: 1.8;
+      color: #8892BE;
+    }
+    .timeline-content strong { color: #5B7FFF; }
+    .timeline-content .event { margin-bottom: 6px; }
+    
+    /* 分享按钮 */
+    .share-btn-container {
+      margin: 24px 0;
+      text-align: center;
+    }
+    .btn-share {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 25px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-banner">
+    <span>🧪 测试模式 · 随机生成结果 · 仅供预览</span>
+  </div>
+  
+  <div class="result-container" id="result-page">
+    <div class="result-header">
+      <h1>📊 人生先天参数测评结果</h1>
+      <div class="result-time" id="result-time"></div>
+    </div>
+    
+    <div class="score-ring-container">
+      <canvas id="score-ring" width="200" height="200"></canvas>
+    </div>
+    
+    <div class="level-info">
+      <div class="badge" id="level-badge">--</div>
+      <div class="level-desc" id="level-desc">--</div>
+      <div class="level-subinfo" id="level-subinfo"></div>
+    </div>
+    
+    <div class="radar-section">
+      <h3>📈 七维能力雷达图</h3>
+      <div class="radar-container">
+        <canvas id="radar-chart" width="280" height="280"></canvas>
+      </div>
+    </div>
+    
+    <div class="dim-scores" id="dim-scores"></div>
+    
+    <div class="prediction-grid" id="prediction-grid"></div>
+    
+    <div class="career-bars" id="career-bars"></div>
+    
+    <div class="analysis-section" id="analysis-section">
+      <h3>📝 个性化分析报告</h3>
+      <div id="analysis-content"></div>
+    </div>
+    
+    <div class="prob-timeline" id="prob-timeline-section">
+      <h3>⏰ 人生概率时间线</h3>
+      <div class="timeline-content" id="prob-timeline"></div>
+    </div>
+    
+    <div class="suggestions">
+      <h3>💡 针对性提升建议</h3>
+      <div id="suggestions"></div>
+    </div>
+    
+    <div class="share-btn-container">
+      <button class="btn-share" onclick="alert('实际使用时请先完成测评！')">🔗 分享结果</button>
+    </div>
+  </div>
+  
+  <script src="questions.js"></script>
+  <script src="scoring.js"></script>
+  <script>
+    // ===== 生成随机答案 =====
+    function generateRandomAnswers() {
+      const answers = {};
+      QUESTIONS.forEach(q => {
+        const randomIdx = Math.floor(Math.random() * q.options.length);
+        answers[q.id] = q.options[randomIdx].score;
+        answers[q.id + '_idx'] = randomIdx;
+      });
+      return answers;
+    }
+    
+    // ===== 显示结果 =====
+    function showResult() {
+      const answers = generateRandomAnswers();
+      const result = calcScores(answers);
+      const levelInfo = getLevel(result.total);
+      const income = incomeRange(result.predictions.income);
+      const suggestions = generateSuggestions(result);
+      const analysisBlocks = generateAnalysis(result);
+      const probTimeline = generateProbTimeline(result);
+      
+      // 时间
+      document.getElementById('result-time').textContent = '测试时间：' + new Date().toLocaleString('zh-CN');
+      
+      // 总分环
+      drawScoreRing(result.total, levelInfo.color);
+      document.getElementById('level-badge').innerHTML = 
+        `<span class="badge" style="background:${levelInfo.color}">${levelInfo.level} · ${levelInfo.name}</span>`;
+      document.getElementById('level-desc').textContent = levelInfo.desc;
+      document.getElementById('level-subinfo').innerHTML = `
+        <span>📊 综合得分：<strong>${result.total}分</strong></span>
+        <span>📈 社会排名：<strong>${levelInfo.percentile}</strong></span>
+        <span>🏷️ 标签：<strong>${levelInfo.tag}</strong></span>
+      `;
+      
+      // 雷达图
+      setTimeout(() => drawRadar(result.dimScores), 100);
+      
+      // 维度得分
+      renderDimScores(result.dimScores);
+      
+      // 预测指标
+      renderPredictions(result.predictions, income);
+      
+      // 职场能力
+      renderCareerBars(result.predictions);
+      
+      // 分析报告
+      renderAnalysisBlocks(analysisBlocks);
+      
+      // 时间线
+      document.getElementById('prob-timeline').innerHTML = probTimeline;
+      
+      // 建议
+      renderSuggestions(suggestions);
+    }
+    
+    // ===== 绘制总分环 =====
+    function drawScoreRing(score, color) {
+      const canvas = document.getElementById('score-ring');
+      const ctx = canvas.getContext('2d');
+      const cx = 100, cy = 100, r = 80;
+      ctx.clearRect(0, 0, 200, 200);
+      
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = '#E8EEFF';
+      ctx.lineWidth = 14;
+      ctx.stroke();
+      
+      const angle = (score / 100) * Math.PI * 2 - Math.PI / 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, -Math.PI / 2, angle);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 14;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 14;
+      ctx.stroke();
+      
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 36px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(score, cx, cy);
+      ctx.font = '14px sans-serif';
+      ctx.fillStyle = '#8892BE';
+      ctx.fillText('分', cx, cy + 28);
+    }
+    
+    // ===== 雷达图 =====
+    function drawRadar(dimScores) {
+      const canvas = document.getElementById('radar-chart');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      const cx = W / 2, cy = H / 2 + 10;
+      const R = Math.min(W, H) / 2 - 65;
+      ctx.clearRect(0, 0, W, H);
+      
+      const dims = Object.keys(DIMENSIONS);
+      const n = dims.length;
+      const angles = dims.map((_, i) => (i / n) * Math.PI * 2 - Math.PI / 2);
+      
+      for (let ring = 1; ring <= 5; ring++) {
+        ctx.beginPath();
+        angles.forEach((a, i) => {
+          const r = R * ring / 5;
+          const x = cx + Math.cos(a) * r;
+          const y = cy + Math.sin(a) * r;
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.closePath();
+        ctx.strokeStyle = 'rgba(91,127,255,0.1)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        
+        if (ring % 2 === 0) {
+          ctx.fillStyle = 'rgba(90,104,153,0.8)';
+          ctx.font = 'bold 14px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(ring * 20, cx + 8, cy - R * ring / 5 + 5);
+        }
+      }
+      
+      angles.forEach((a) => {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R);
+        ctx.strokeStyle = 'rgba(91,127,255,0.12)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+      
+      ctx.beginPath();
+      dims.forEach((d, i) => {
+        const val = dimScores[d] / 100;
+        const x = cx + Math.cos(angles[i]) * R * val;
+        const y = cy + Math.sin(angles[i]) * R * val;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(91,127,255,0.15)';
+      ctx.fill();
+      ctx.strokeStyle = '#5B7FFF';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#5B7FFF';
+      ctx.shadowBlur = 10;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      
+      dims.forEach((d, i) => {
+        const val = dimScores[d] / 100;
+        const x = cx + Math.cos(angles[i]) * R * val;
+        const y = cy + Math.sin(angles[i]) * R * val;
+        ctx.beginPath();
+        ctx.arc(x, y, 5.5, 0, Math.PI * 2);
+        ctx.fillStyle = DIMENSIONS[d].color;
+        ctx.shadowColor = DIMENSIONS[d].color;
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+      
+      dims.forEach((d, i) => {
+        const a = angles[i];
+        const labelR = R + 45;
+        const x = cx + Math.cos(a) * labelR;
+        const y = cy + Math.sin(a) * labelR;
+        ctx.fillStyle = DIMENSIONS[d].color;
+        ctx.font = 'bold 15px sans-serif';
+        ctx.textAlign = Math.abs(Math.cos(a)) < 0.1 ? 'center' : (Math.cos(a) > 0 ? 'left' : 'right');
+        ctx.textBaseline = 'middle';
+        ctx.fillText(DIMENSIONS[d].icon + ' ' + DIMENSIONS[d].name, x, y);
+        ctx.fillStyle = 'rgba(90,104,153,0.9)';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText(dimScores[d] + '分', x, y + 20);
+      });
+    }
+    
+    // ===== 维度得分 =====
+    function renderDimScores(dimScores) {
+      const el = document.getElementById('dim-scores');
+      el.innerHTML = Object.keys(DIMENSIONS).map(d => {
+        const s = dimScores[d];
+        const dim = DIMENSIONS[d];
+        const label = s >= 80 ? '优秀' : s >= 65 ? '良好' : s >= 50 ? '中等' : s >= 35 ? '偏弱' : '薄弱';
+        return `<div class="dim-score-row">
+          <div class="dim-score-label">
+            <span>${dim.icon} ${dim.name}</span>
+            <span style="color:${dim.color};font-weight:700">${s}分 · ${label}</span>
+          </div>
+          <div class="dim-bar-bg">
+            <div class="dim-bar-fill" style="width:${s}%;background:${dim.color}"></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    
+    // ===== 预测指标 =====
+    function renderPredictions(pred, income) {
+      const md = marriageDesc(pred.marriage);
+      const items = [
+        {
+          label: '收入水平预测', value: income.detail,
+          sub: income.detail + ' | ' + income.desc,
+          color: income.color
+        },
+        {
+          label: '阶层区间预测', value: classRange(pred.class),
+          sub: '基于综合参数的阶层预测',
+          color: '#5B7FFF'
+        },
+        {
+          label: '职业稳定性指数', value: pred.unemployment >= 65 ? '高稳定' : pred.unemployment >= 45 ? '中等' : '风险偏高',
+          sub: '稳定性指数 ' + pred.unemployment,
+          color: '#3DD9A0'
+        },
+        {
+          label: '婚恋关系预测', value: md.label,
+          sub: '婚恋潜力 ' + md.prob + ' · 关系质量指数 ' + pred.marriage,
+          color: '#FF6B8A'
+        }
+      ];
+      
+      document.getElementById('prediction-grid').innerHTML = items.map(item => `
+        <div class="pred-card" style="--pred-color:${item.color}">
+          <div class="pred-icon">${item.label.split(' ')[0]}</div>
+          <div class="pred-label">${item.label.split(' ').slice(1).join(' ')}</div>
+          <div class="pred-value" style="color:${item.color}">${item.value}</div>
+          <div class="pred-sub">${item.sub}</div>
+        </div>
+      `).join('');
+    }
+    
+    // ===== 职场能力条 =====
+    function renderCareerBars(pred) {
+      const cc = careerCeilDesc(pred.careerCeil);
+      const items = [
+        { label: '职场上限', value: pred.careerCeil, color: cc.color, desc: cc.label },
+        { label: '晋升概率', value: pred.promotion, color: '#5B7FFF' },
+        { label: '创业成功概率', value: pred.startup, color: '#FFB347' },
+        { label: '抗压韧性', value: pred.stress, color: '#FF9A3C' },
+        { label: '职业稳定性', value: pred.stability, color: '#3DD9A0' }
+      ];
+      
+      document.getElementById('career-bars').innerHTML = `
+        <h3>💼 职场发展预测</h3>
+        ${items.map(item => `
+          <div class="career-row">
+            <div class="career-label">
+              <span>${item.label}${item.desc ? '：' + item.desc : ''}</span>
+              <span style="color:${item.color};font-weight:700">${item.value}%</span>
+            </div>
+            <div class="career-bar-bg">
+              <div class="career-bar-fill" style="width:${item.value}%;background:linear-gradient(90deg,${item.color},${item.color}88)"></div>
+            </div>
+          </div>
+        `).join('')}
+      `;
+    }
+    
+    // ===== 分析报告 =====
+    function renderAnalysisBlocks(blocks) {
+      const el = document.getElementById('analysis-content');
+      el.innerHTML = blocks.map(b => `
+        <div class="analysis-block" style="--block-color:${b.color}">
+          <div class="block-title">${b.title}</div>
+          <div class="block-body">${b.content}</div>
+          ${b.theory ? '<div class="theory-tag">📖 ' + b.theory + '</div>' : ''}
+          ${b.theoryDetail ? '<div class="theory-detail">' + b.theoryDetail + '</div>' : ''}
+          ${b.yijing ? '<div class="yijing-wisdom">💎 ' + b.yijing + '</div>' : ''}
+        </div>
+      `).join('');
+    }
+    
+    // ===== 建议 =====
+    function renderSuggestions(sugs) {
+      document.getElementById('suggestions').innerHTML = sugs.map(s => {
+        const steps = s.desc.split(/(?=[①②③④⑤⑥⑦⑧⑨⑩])/);
+        const stepsHtml = steps.map((step, i) => {
+          const trimmed = step.trim();
+          if (!trimmed) return '';
+          return '<div class="sug-step"><span class="sug-step-num">' + (i + 1) + '</span><span>' + trimmed.replace(/^[一二三四五六七八九十][.、]\s*/, '') + '</span></div>';
+        }).join('');
+        
+        return `
+        <div class="sug-card" style="--block-color:${s.color || '#5B7FFF'}">
+          <div class="sug-icon">${s.icon}</div>
+          <div class="sug-body">
+            <strong>${s.title}</strong>
+            <div class="sug-steps">${stepsHtml}</div>
+          </div>
+        </div>
+      `;
+      }).join('');
+    }
+    
+    // ===== 页面加载时自动生成 =====
+    window.addEventListener('load', showResult);
+    
+    // ===== F5 刷新重新生成 =====
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'F5') {
+        location.reload();
+      }
+    });
+  </script>
+</body>
+</html>
