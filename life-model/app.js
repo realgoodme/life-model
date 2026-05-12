@@ -760,7 +760,9 @@ function switchShareTab(tab) {
   document.getElementById('share-' + tab + '-tab').classList.add('active');
 
   // 根据标签执行相应操作
-  if (tab === 'link') {
+  if (tab === 'image') {
+    generateShareImage();
+  } else if (tab === 'link') {
     generateShareLink();
   } else if (tab === 'qrcode') {
     generateQRCode();
