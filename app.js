@@ -267,9 +267,16 @@ function drawScoreRing(score, color) {
 function drawRadar(dimScores) {
   const canvas = document.getElementById('radar-chart');
   const ctx = canvas.getContext('2d');
+  
+  // 根据显示尺寸动态调整画布大小
+  const displayW = canvas.clientWidth;
+  const displayH = canvas.clientHeight || canvas.clientWidth;
+  canvas.width = displayW;
+  canvas.height = displayH;
+  
   const W = canvas.width, H = canvas.height;
-  const cx = W / 2, cy = H / 2 + 10;
-  const R = Math.min(W, H) / 2 - 65;
+  const cx = W / 2, cy = H / 2;
+  const R = Math.min(W, H) / 2 - (W < 400 ? 50 : 65);
   ctx.clearRect(0, 0, W, H);
 
   const dims = Object.keys(DIMENSIONS);
@@ -290,10 +297,11 @@ function drawRadar(dimScores) {
     ctx.stroke();
 
     if (ring % 2 === 0) {
-      ctx.fillStyle = 'rgba(90,104,153,0.8)';
-      ctx.font = 'bold 14px sans-serif';
+      ctx.fillStyle = 'rgba(90,104,153,0.9)';
+      const fontSize = Math.max(12, W / 45);
+      ctx.font = 'bold ' + fontSize + 'px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(ring * 20, cx + 8, cy - R * ring / 5 + 5);
+      ctx.fillText(ring * 20, cx + 6, cy - R * ring / 5 + fontSize / 3);
     }
   }
 
@@ -338,17 +346,19 @@ function drawRadar(dimScores) {
 
   dims.forEach((d, i) => {
     const a = angles[i];
-    const labelR = R + 45;
+    const labelR = R + (W < 400 ? 35 : 45);
     const x = cx + Math.cos(a) * labelR;
     const y = cy + Math.sin(a) * labelR;
     ctx.fillStyle = DIMENSIONS[d].color;
-    ctx.font = 'bold 15px sans-serif';
+    const fontSize1 = Math.max(13, W / 40);
+    ctx.font = 'bold ' + fontSize1 + 'px sans-serif';
     ctx.textAlign = Math.abs(Math.cos(a)) < 0.1 ? 'center' : (Math.cos(a) > 0 ? 'left' : 'right');
     ctx.textBaseline = 'middle';
     ctx.fillText(DIMENSIONS[d].icon + ' ' + DIMENSIONS[d].name, x, y);
     ctx.fillStyle = 'rgba(90,104,153,0.9)';
-    ctx.font = 'bold 13px sans-serif';
-    ctx.fillText(dimScores[d] + '分', x, y + 20);
+    const fontSize2 = Math.max(11, W / 50);
+    ctx.font = 'bold ' + fontSize2 + 'px sans-serif';
+    ctx.fillText(dimScores[d] + '分', x, y + fontSize1 + 4);
   });
 }
 
