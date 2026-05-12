@@ -198,12 +198,33 @@ function showResult() {
 
     try {
       renderDimScores(result.dimScores);
+      console.log('renderDimScores完成');
+    } catch(e) { console.error('renderDimScores错误:', e); }
+
+    try {
       renderPredictions(result.predictions, income);
+      console.log('renderPredictions完成');
+    } catch(e) { console.error('renderPredictions错误:', e); }
+
+    try {
       renderCareerBars(result.predictions);
+      console.log('renderCareerBars完成');
+    } catch(e) { console.error('renderCareerBars错误:', e); }
+
+    try {
       renderAnalysisBlocks(analysisBlocks);
+      console.log('renderAnalysisBlocks完成');
+    } catch(e) { console.error('renderAnalysisBlocks错误:', e); }
+
+    try {
       document.getElementById('prob-timeline').innerHTML = probTimeline;
+      console.log('prob-timeline渲染完成');
+    } catch(e) { console.error('prob-timeline错误:', e); }
+
+    try {
       renderSuggestions(suggestions);
-    } catch(e) { console.error('渲染错误:', e); }
+      console.log('renderSuggestions完成');
+    } catch(e) { console.error('renderSuggestions错误:', e); }
 
     console.log('=== 结果展示完成 ===');
   } catch(e) {
