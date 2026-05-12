@@ -181,6 +181,8 @@
 <script src="crypto.js"></script>
 <script src="scoring.js"></script>
 <script src="app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <!-- 用户名输入模态框 -->
 <div id="name-modal" class="modal-overlay">
@@ -197,5 +199,43 @@
   </div>
 </div>
 
+<!-- 分享弹窗 -->
+<div id="share-modal" class="share-modal-overlay">
+  <div class="share-modal">
+    <div class="share-header">
+      <h3>📤 分享你的测评结果</h3>
+      <button class="share-close" onclick="closeShareModal()">×</button>
+    </div>
+    <div class="share-preview" id="share-preview"></div>
+    <div class="share-tabs">
+      <button class="share-tab active" onclick="switchShareTab('image')">🖼️ 生成图片</button>
+      <button class="share-tab" onclick="switchShareTab('link')">🔗 分享链接</button>
+      <button class="share-tab" onclick="switchShareTab('qrcode')">📱 二维码</button>
+    </div>
+    <div class="share-content">
+      <div id="share-image-tab" class="share-tab-content active">
+        <p class="share-tip">生成一张精美的结果分享图片，可以保存到相册或发送给朋友</p>
+        <button class="btn-share-action" onclick="generateShareImage()">📸 生成图片</button>
+        <div id="share-image-preview" class="share-image-preview"></div>
+      </div>
+      <div id="share-link-tab" class="share-tab-content">
+        <p class="share-tip">复制专属链接，朋友打开即可查看你的分析结果</p>
+        <div class="share-link-box">
+          <input type="text" id="share-link-input" readonly />
+          <button class="btn-copy-link" onclick="copyShareLink()">复制链接</button>
+        </div>
+      </div>
+      <div id="share-qrcode-tab" class="share-tab-content">
+        <p class="share-tip">扫描二维码，快速分享给你的朋友</p>
+        <div id="qrcode-container" class="qrcode-container"></div>
+        <button class="btn-share-action" onclick="downloadQRCode()">📥 下载二维码</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
+<script>
+document.write('<div id="version-tag">Life Model v2026.05.12</div>');
+</script>
