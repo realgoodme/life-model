@@ -136,8 +136,7 @@
         <button class="btn-login" onclick="doLogin()">登录</button>
         <button class="btn-guest" onclick="goHome()">返回首页</button>
       </div>
-      <p class="login-hint">💡 默认密钥：<code id="default-key">admin2026</code></p>
-      <p class="login-change" onclick="showChangeKey()">修改密钥</p>
+      <p class="login-hint">请输入管理员密钥</p>
     </div>
     <button class="btn-back-link" onclick="goHome()">← 返回首页</button>
   </div>
@@ -147,9 +146,12 @@
   <div class="admin-header">
     <div>
       <h1>📊 测评数据后台</h1>
-      <p class="admin-sub">已登录 · <span id="login-time"></span> <button class="btn-logout" onclick="doLogout()">退出</button></p>
+      <p class="admin-sub">已登录 · <span id="login-time"></span></p>
     </div>
-    <button class="btn-back" onclick="goHome()">← 返回首页</button>
+    <div>
+      <button class="btn-change-key" onclick="showChangeKey()">🔑 修改密钥</button>
+      <button class="btn-logout" onclick="doLogout()">退出</button>
+    </div>
   </div>
   <div class="admin-body">
     <div class="admin-stats" id="admin-stats"></div>
