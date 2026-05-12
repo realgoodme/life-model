@@ -608,45 +608,88 @@ body {
   font-weight: 500;
 }
 
-/* 概率时间轴 */
-.prob-timeline { display: flex; flex-direction: column; gap: 16px; }
+/* 概率时间轴 - 优化版 */
+.prob-timeline { display: flex; flex-direction: column; gap: 14px; }
 
 .prob-row {
-  display: grid;
-  grid-template-columns: 120px 1fr 80px;
-  gap: 16px;
+  background: var(--bg4);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
   align-items: center;
+  gap: 16px;
+  transition: all 0.2s;
 }
+.prob-row:hover { border-color: var(--purple); box-shadow: 0 4px 16px rgba(91,127,255,0.1); }
 
 .prob-label {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  color: var(--text2);
+  color: var(--text);
+  min-width: 90px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.prob-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--purple);
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .prob-bar-bg {
-  height: 28px;
+  flex: 1;
+  height: 36px;
   background: var(--bg3);
-  border-radius: 999px;
+  border-radius: 10px;
   overflow: hidden;
   position: relative;
 }
 
 .prob-bar-fill {
   height: 100%;
-  border-radius: 999px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  padding-left: 12px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  padding-left: 14px;
+  font-size: 0.85rem;
+  font-weight: 800;
   color: #fff;
   transition: width 1.5s cubic-bezier(0.4,0,0.2,1);
   white-space: nowrap;
   overflow: hidden;
+  position: relative;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.prob-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15));
 }
 
-.prob-value { font-size: 0.85rem; font-weight: 700; color: var(--text); text-align: right; }
+.prob-value {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--text);
+  min-width: 52px;
+  text-align: right;
+}
+
+/* 概率条颜色变体 */
+.prob-bar-income { background: linear-gradient(90deg, #FFB347, #FF8C00); }
+.prob-bar-class { background: linear-gradient(90deg, #5B7FFF, #4A6AE5); }
+.prob-bar-health { background: linear-gradient(90deg, #FF8C69, #FF6347); }
+.prob-bar-action { background: linear-gradient(90deg, #7DD3FC, #38BDF8); }
+.prob-bar-stability { background: linear-gradient(90deg, #3DD9A0, #2BC488); }
+.prob-bar-promotion { background: linear-gradient(90deg, #A78BFA, #8B5CF6); }
+.prob-bar-stress { background: linear-gradient(90deg, #FF6B8A, #FF4757); }
+.prob-bar-marriage { background: linear-gradient(90deg, #FF6B8A, #FF8FAB); }
 
 /* 建议 */
 .suggestions { display: flex; flex-direction: column; gap: 14px; }
