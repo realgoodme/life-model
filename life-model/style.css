@@ -1284,3 +1284,14 @@ tr:hover td { background: var(--bg4); }
   transform: translateY(-1px);
 }
 
+/* ============================================================ 版本标注 ============================================================ */
+#version-tag {
+  position: fixed;
+  bottom: 8px;
+  right: 12px;
+  font-size: 0.7rem;
+  color: var(--text3);
+  opacity: 0.5;
+  z-index: 100;
+}
+
