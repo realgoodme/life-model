@@ -39,3 +39,10 @@ life-model/
 - Canvas 绘制雷达图和评分环
 - localStorage 存储测评数据
 - 无任何外部依赖，100% 离线可用
+
+<!-- AUTO_UPDATE -->
+## 最近更新
+
+- 2026-05-12 15:30:47: 完善分享功能（图片/链接/二维码）、优化概率区间显示、增强后天偏移策略建议
+
+**网站地址**: https://realgoodme.github.io/life-model/
