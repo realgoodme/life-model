@@ -584,6 +584,17 @@ body {
   font-style: italic;
 }
 
+.analysis-block .theory-detail {
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: rgba(91, 127, 255, 0.04);
+  border: 1px solid rgba(91, 127, 255, 0.1);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: var(--text2);
+  line-height: 1.85;
+}
+
 .analysis-block .yijing-wisdom {
   display: block;
   margin-top: 14px;
