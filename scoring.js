@@ -79,10 +79,31 @@ function getLevel(total) {
 }
 
 function incomeRange(score) {
-  if (score >= 80) return { detail: '高收入', desc: '收入处于社会前20%' };
-  if (score >= 60) return { detail: '中高收入', desc: '收入处于社会前40%' };
-  if (score >= 40) return { detail: '中等收入', desc: '收入处于社会平均水平' };
-  return { detail: '中低收入', desc: '收入需要提升' };
+  if (score >= 80) return { detail: '高收入', desc: '收入处于社会前20%', color: '#FFB347' };
+  if (score >= 60) return { detail: '中高收入', desc: '收入处于社会前40%', color: '#3DD9A0' };
+  if (score >= 40) return { detail: '中等收入', desc: '收入处于社会平均水平', color: '#5B7FFF' };
+  return { detail: '中低收入', desc: '收入需要提升', color: '#FF6B8A' };
+}
+
+function careerCeilDesc(score) {
+  if (score >= 75) return { label: '高层管理/专家', color: '#FFB347' };
+  if (score >= 55) return { label: '中层管理者', color: '#5B7FFF' };
+  if (score >= 35) return { label: '基层骨干', color: '#3DD9A0' };
+  return { label: '基础岗位', color: '#A78BFA' };
+}
+
+function marriageDesc(score) {
+  if (score >= 65) return { label: '婚恋潜力优秀', prob: '高' };
+  if (score >= 45) return { label: '婚恋潜力中等', prob: '中' };
+  return { label: '需主动拓展', prob: '低' };
+}
+
+function classRange(score) {
+  if (score >= 72) return '上层阶层';
+  if (score >= 55) return '中上层';
+  if (score >= 38) return '中层';
+  if (score >= 22) return '中下层';
+  return '下层';
 }
 
 function generateAnalysis(result) {
