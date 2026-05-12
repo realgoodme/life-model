@@ -967,29 +967,32 @@ function generateQRCode() {
   // 使用二维码
   if (typeof QRCode !== 'undefined') {
     try {
-      // 美化：给容器添加样式
-      container.style.cssText = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 16px; display: inline-block; box-shadow: 0 8px 32px rgba(102,126,234,0.3);';
+      // 先清空容器所有内容
+      container.innerHTML = '';
+      container.style.cssText = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px; border-radius: 16px; display: inline-block; box-shadow: 0 8px 32px rgba(102,126,234,0.3);';
 
       qrcodeInstance = new QRCode(container, {
         text: url,
-        width: 200,
-        height: 200,
+        width: 180,
+        height: 180,
         colorDark: '#1A2040',
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
       });
 
-      // 美化：二维码二维码添加圆角和白边
+      // 等待 QRCode 创建完成后，清理多余的子元素，只保留一个
       setTimeout(() => {
-        const qrImg = container.querySelector('img');
-        if (qrImg) {
-          qrImg.style.cssText = 'border-radius: 12px; background: white; padding: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);';
+        const children = container.children;
+        // 保留第一个子元素（img 或 canvas）
+        for (let i = children.length - 1; i > 0; i--) {
+          children[i].remove();
         }
-        const qrCanvas = container.querySelector('canvas');
-        if (qrCanvas) {
-          qrCanvas.style.cssText = 'border-radius: 12px; background: white; padding: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);';
+        // 美化二维码
+        const firstChild = container.firstElementChild;
+        if (firstChild) {
+          firstChild.style.cssText = 'border-radius: 8px; background: white; padding: 6px; display: block; margin: 0 auto;';
         }
-      }, 100);
+      }, 50);
 
       console.log('[二维码] 生成成功');
     } catch(e) {
