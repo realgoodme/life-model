@@ -787,45 +787,50 @@ function generateShareImage() {
   `;
 
   const level = getLevel(currentShareResult.total);
+  const pred = currentShareResult.predictions || {};
 
   shareCard.innerHTML = `
-    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">人生先天参数评分模型</div>
-    <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">${currentShareName}</div>
-    <div style="font-size: 64px; font-weight: 900; margin-bottom: 12px;">${currentShareResult.total}</div>
-    <div style="display: inline-block; padding: 6px 20px; background: rgba(255,255,255,0.2); border-radius: 999px; font-size: 14px; font-weight: bold; margin-bottom: 24px;">
-      ${level.level}级 · ${level.name}
+    <div style="font-size: 13px; opacity: 0.85; margin-bottom: 6px;">🏛️ 人生先天参数评分模型</div>
+    <div style="font-size: 22px; font-weight: bold; margin-bottom: 16px;">${currentShareName}</div>
+    <div style="font-size: 72px; font-weight: 900; margin-bottom: 8px;">${currentShareResult.total}</div>
+    <div style="display: inline-block; padding: 5px 18px; background: rgba(255,255,255,0.2); border-radius: 999px; font-size: 13px; font-weight: bold; margin-bottom: 16px;">
+      ${level.level}级 · ${level.name} · 前${level.percentile}
     </div>
-    <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
-      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
-        <div style="opacity: 0.8;">出身</div>
-        <div style="font-weight: bold;">${currentShareResult.dimScores.birth}</div>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px;">
+      <div style="background: rgba(255,255,255,0.15); padding: 6px 8px; border-radius: 8px; font-size: 11px;">
+        <div style="opacity: 0.8;">🏛️ 出身</div>
+        <div style="font-weight: bold; font-size: 14px;">${currentShareResult.dimScores.birth}</div>
       </div>
-      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
-        <div style="opacity: 0.8;">家庭</div>
-        <div style="font-weight: bold;">${currentShareResult.dimScores.family}</div>
+      <div style="background: rgba(255,255,255,0.15); padding: 6px 8px; border-radius: 8px; font-size: 11px;">
+        <div style="opacity: 0.8;">🏠 家庭</div>
+        <div style="font-weight: bold; font-size: 14px;">${currentShareResult.dimScores.family}</div>
       </div>
-      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
-        <div style="opacity: 0.8;">天赋</div>
-        <div style="font-weight: bold;">${currentShareResult.dimScores.talent}</div>
+      <div style="background: rgba(255,255,255,0.15); padding: 6px 8px; border-radius: 8px; font-size: 11px;">
+        <div style="opacity: 0.8;">🧠 天赋</div>
+        <div style="font-weight: bold; font-size: 14px;">${currentShareResult.dimScores.talent}</div>
       </div>
-      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
-        <div style="opacity: 0.8;">性格</div>
-        <div style="font-weight: bold;">${currentShareResult.dimScores.character}</div>
+      <div style="background: rgba(255,255,255,0.15); padding: 6px 8px; border-radius: 8px; font-size: 11px;">
+        <div style="opacity: 0.8;">🎭 性格</div>
+        <div style="font-weight: bold; font-size: 14px;">${currentShareResult.dimScores.character}</div>
       </div>
-      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
-        <div style="opacity: 0.8;">时代</div>
-        <div style="font-weight: bold;">${currentShareResult.dimScores.era}</div>
+      <div style="background: rgba(255,255,255,0.15); padding: 6px 8px; border-radius: 8px; font-size: 11px;">
+        <div style="opacity: 0.8;">🌍 时代</div>
+        <div style="font-weight: bold; font-size: 14px;">${currentShareResult.dimScores.era}</div>
       </div>
-      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
-        <div style="opacity: 0.8;">健康</div>
-        <div style="font-weight: bold;">${currentShareResult.dimScores.health}</div>
+      <div style="background: rgba(255,255,255,0.15); padding: 6px 8px; border-radius: 8px; font-size: 11px;">
+        <div style="opacity: 0.8;">🏥 健康</div>
+        <div style="font-weight: bold; font-size: 14px;">${currentShareResult.dimScores.health}</div>
       </div>
-      <div style="background: rgba(255,255,255,0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px;">
-        <div style="opacity: 0.8;">行动</div>
-        <div style="font-weight: bold;">${currentShareResult.dimScores.action}</div>
+      <div style="background: rgba(255,255,255,0.15); padding: 6px 8px; border-radius: 8px; font-size: 11px;">
+        <div style="opacity: 0.8;">⚡ 行动</div>
+        <div style="font-weight: bold; font-size: 14px;">${currentShareResult.dimScores.action}</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.15); padding: 6px 8px; border-radius: 8px; font-size: 11px;">
+        <div style="opacity: 0.8;">💰 收入</div>
+        <div style="font-weight: bold; font-size: 14px;">${pred.income || '--'}</div>
       </div>
     </div>
-    <div style="font-size: 11px; opacity: 0.6;">长按识别二维码查看完整分析</div>
+    <div style="font-size: 10px; opacity: 0.5; margin-top: 12px;">基于社会学 · 经济学 · 心理学 · 教育学</div>
   `;
 
   document.body.appendChild(shareCard);
@@ -932,19 +937,35 @@ function generateQRCode() {
   const container = document.getElementById('qrcode-container');
   container.innerHTML = '';
 
-  const url = typeof getShareUrl === 'function'
-    ? getShareUrl(currentShareResult, currentShareName)
-    : window.location.href;
+  // 生成丰富的分享 URL
+  let shareText = '📊 人生先天参数测评';
+  if (currentShareResult && currentShareName) {
+    const level = getLevel(currentShareResult.total);
+    shareText = '📊 人生先天参数 | ' + currentShareName + ' | ' + currentShareResult.total + '分 | ' + level.level + '级 ' + level.name;
+  }
+
+  const baseUrl = window.location.origin + window.location.pathname;
+  let url = baseUrl;
+  if (typeof encodeShareData === 'function' && currentShareResult) {
+    const encoded = encodeShareData(currentShareResult, currentShareName);
+    if (encoded) {
+      url = baseUrl + '?share=' + encoded;
+    }
+  }
 
   if (typeof QRCode !== 'undefined') {
     qrcodeInstance = new QRCode(container, {
       text: url,
-      width: 180,
-      height: 180,
+      width: 200,
+      height: 200,
       colorDark: '#1A2040',
       colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M
+      correctLevel: QRCode.CorrectLevel.H,
+      title: shareText
     });
+
+    // 添加标题
+    container.insertAdjacentHTML('beforebegin', '<div class="qrcode-title">' + shareText + '</div>');
   } else {
     container.innerHTML = '<div style="text-align:center;color:var(--red);padding:20px;">二维码库加载失败</div>';
   }
