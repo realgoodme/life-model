@@ -743,7 +743,9 @@ function openShareModal() {
 
 function closeShareModal() {
   document.getElementById('share-modal').classList.remove('show');
-  // 清理二维码实例
+  // 清理二维码实例和标题
+  const qrcodeTitle = document.querySelector('.qrcode-title');
+  if (qrcodeTitle) qrcodeTitle.remove();
   if (qrcodeInstance) {
     qrcodeInstance.clear();
     qrcodeInstance = null;
@@ -937,13 +939,17 @@ function generateQRCode() {
   const container = document.getElementById('qrcode-container');
   container.innerHTML = '';
 
-  // 生成丰富的分享 URL
-  let shareText = '📊 人生先天参数测评';
+  // 生成标题
+  let shareTitle = '📊 人生先天参数测评';
   if (currentShareResult && currentShareName) {
     const level = getLevel(currentShareResult.total);
-    shareText = '📊 人生先天参数 | ' + currentShareName + ' | ' + currentShareResult.total + '分 | ' + level.level + '级 ' + level.name;
+    shareTitle = '📊 人生先天参数 | ' + currentShareName + ' | ' + currentShareResult.total + '分 | ' + level.level + '级';
   }
 
+  // 添加标题
+  container.insertAdjacentHTML('beforebegin', '<div class="qrcode-title">' + shareTitle + '</div>');
+
+  // 生成分享 URL
   const baseUrl = window.location.origin + window.location.pathname;
   let url = baseUrl;
   if (typeof encodeShareData === 'function' && currentShareResult) {
@@ -953,19 +959,37 @@ function generateQRCode() {
     }
   }
 
-  if (typeof QRCode !== 'undefined') {
-    qrcodeInstance = new QRCode(container, {
-      text: url,
-      width: 200,
-      height: 200,
-      colorDark: '#1A2040',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.H,
-      title: shareText
+  // 使用葵花码（彩色渐变二维码）
+  if (typeof QRCodeStyling !== 'undefined') {
+    qrcodeInstance = new QRCodeStyling({
+      width: 220,
+      height: 220,
+      type: 'canvas',
+      data: url,
+      image: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iIzVmN2ZmZiIvPjxwYXRoIGQ9Ik0zMCA1MGgtNDB2NDBoNDB6Ii8+PHBhdGggZD0iTTcwIDUwaC00MHY0MGg0MHoiIGZpbGw9IiM3MmI1ZTAiLz48dGV4dCB4PSI1MCIgeT0iNTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQ9ImJvbGQiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiMxYTIwNDAiIHI9IjUuNSI+6YO15aW25aW2PC9wYXRoPjwvc3ZnPg==',
+      dotsOptions: {
+        color: '#1A2040',
+        type: 'rounded'
+      },
+      backgroundOptions: {
+        color: '#ffffff'
+      },
+      cornersSquareOptions: {
+        color: '#5B7FFF',
+        type: 'extra-rounded'
+      },
+      cornersDotOptions: {
+        color: '#FF6B8A',
+        type: 'dot'
+      },
+      imageOptions: {
+        crossOrigin: 'anonymous',
+        margin: 6,
+        imageSize: 0.25
+      }
     });
 
-    // 添加标题
-    container.insertAdjacentHTML('beforebegin', '<div class="qrcode-title">' + shareText + '</div>');
+    qrcodeInstance.append(container);
   } else {
     container.innerHTML = '<div style="text-align:center;color:var(--red);padding:20px;">二维码库加载失败</div>';
   }
@@ -976,10 +1000,10 @@ function downloadQRCode() {
   const canvas = container.querySelector('canvas');
   if (canvas) {
     const link = document.createElement('a');
-    link.download = '测评结果二维码_' + currentShareName + '.png';
+    link.download = '人生测评葵花码_' + currentShareName + '.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
-    showToast('二维码已下载');
+    showToast('葵花码已下载');
   } else {
     showToast('请先生成二维码');
   }
