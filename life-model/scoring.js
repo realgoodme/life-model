@@ -425,3 +425,40 @@ function generateSuggestions(result) {
     return [{ icon: '⚠️', title: '建议生成出错', desc: '生成建议时出错: ' + e.message }];
   }
 }
+
+// ---- 分享数据编码/解码 ----
+function encodeShareData(result, name) {
+  // 将结果编码为 URL 安全字符串
+  const data = {
+    n: name,
+    t: result.total,
+    d: result.dimScores,
+    l: getLevel(result.total).level,
+    ln: getLevel(result.total).name
+  };
+  try {
+    const json = JSON.stringify(data);
+    // 使用 base64 编码（浏览器原生 atob/btoa）
+    return btoa(unescape(encodeURIComponent(json)));
+  } catch(e) {
+    console.error('编码分享数据失败:', e);
+    return null;
+  }
+}
+
+function decodeShareData(encoded) {
+  try {
+    const json = decodeURIComponent(escape(atob(encoded)));
+    return JSON.parse(json);
+  } catch(e) {
+    console.error('解码分享数据失败:', e);
+    return null;
+  }
+}
+
+function getShareUrl(result, name) {
+  const encoded = encodeShareData(result, name);
+  if (!encoded) return null;
+  const baseUrl = window.location.origin + window.location.pathname;
+  return baseUrl + '?share=' + encoded;
+}
