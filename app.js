@@ -376,7 +376,7 @@ function renderPredictions(pred, income) {
   const md = marriageDesc(pred.marriage);
   const items = [
     {
-      label: '💰 收入水平预测', value: income.label,
+      label: '💰 收入水平预测', value: income.detail,
       sub: income.detail + ' | ' + income.desc,
       color: income.color
     },
