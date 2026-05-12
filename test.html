@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>测试页面</title>
+</head>
+<body>
+<h1>JavaScript加载测试</h1>
+<div id="status"></div>
+<pre id="output"></pre>
+
+<script src="questions.js"></script>
+<script src="scoring.js"></script>
+<script>
+var output = document.getElementById('output');
+var status = document.getElementById('status');
+
+try {
+    output.textContent += 'QUESTIONS defined: ' + (typeof QUESTIONS !== 'undefined') + '\n';
+    output.textContent += 'DIMENSIONS defined: ' + (typeof DIMENSIONS !== 'undefined') + '\n';
+    output.textContent += 'calcScores defined: ' + (typeof calcScores !== 'undefined') + '\n';
+    output.textContent += 'getLevel defined: ' + (typeof getLevel !== 'undefined') + '\n';
+    output.textContent += 'generateAnalysis defined: ' + (typeof generateAnalysis !== 'undefined') + '\n';
+    output.textContent += 'generateSuggestions defined: ' + (typeof generateSuggestions !== 'undefined') + '\n';
+    output.textContent += 'generateProbTimeline defined: ' + (typeof generateProbTimeline !== 'undefined') + '\n';
+
+    if (typeof QUESTIONS !== 'undefined') {
+        output.textContent += 'QUESTIONS.length: ' + QUESTIONS.length + '\n';
+    }
+
+    // 测试calcScores
+    if (typeof QUESTIONS !== 'undefined' && typeof calcScores !== 'undefined') {
+        output.textContent += '\n--- 测试calcScores ---\n';
+        var testAnswers = {};
+        QUESTIONS.forEach(function(q) {
+            testAnswers[q.id] = 3; // 所有题给3分
+        });
+        try {
+            var result = calcScores(testAnswers);
+            output.textContent += 'calcScores成功! total=' + result.total + '\n';
+            output.textContent += 'dimScores: ' + JSON.stringify(result.dimScores) + '\n';
+        } catch(e) {
+            output.textContent += 'calcScores错误: ' + e.message + '\n';
+            output.textContent += e.stack + '\n';
+        }
+    }
+
+    status.textContent = '测试完成!';
+    status.style.color = 'green';
+} catch(e) {
+    output.textContent += '\n错误: ' + e.message + '\n' + e.stack;
+    status.textContent = '有错误!';
+    status.style.color = 'red';
+}
+</script>
+</body>
+</html>
