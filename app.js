@@ -959,59 +959,48 @@ function generateQRCode() {
     }
   }
 
-  // 使用葵花码（彩色渐变二维码）
-  console.log('[葵花码] QRCodeStyling 是否存在:', typeof QRCodeStyling !== 'undefined');
-  console.log('[葵花码] 分享 URL:', url);
-  if (typeof QRCodeStyling !== 'undefined') {
+  // 使用二维码
+  console.log('[二维码] QRCode 是否存在:', typeof QRCode !== 'undefined');
+  console.log('[二维码] 分享 URL:', url);
+  if (typeof QRCode !== 'undefined') {
     try {
-      qrcodeInstance = new QRCodeStyling({
-        width: 220,
-        height: 220,
-        type: 'canvas',
-        data: url,
-        image: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iIzVmN2ZmZiIvPjxwYXRoIGQ9Ik0zMCA1MGgtNDB2NDBoNDB6Ii8+PHBhdGggZD0iTTcwIDUwaC00MHY0MGg0MHoiIGZpbGw9IiM3MmI1ZTAiLz48dGV4dCB4PSI1MCIgeT0iNTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQ9ImJvbGQiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiMxYTIwNDAiIHI9IjUuNSI+6YO15aW25aW2PC9wYXRoPjwvc3ZnPg==',
-        dotsOptions: {
-          color: '#1A2040',
-          type: 'rounded'
-        },
-        backgroundOptions: {
-          color: '#ffffff'
-        },
-        cornersSquareOptions: {
-          color: '#5B7FFF',
-          type: 'extra-rounded'
-        },
-        cornersDotOptions: {
-          color: '#FF6B8A',
-          type: 'dot'
-        },
-        imageOptions: {
-          crossOrigin: 'anonymous',
-          margin: 6,
-          imageSize: 0.25
-        }
+      container.innerHTML = '';
+      qrcodeInstance = new QRCode(container, {
+        text: url,
+        width: 200,
+        height: 200,
+        colorDark: '#1A2040',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
       });
-      qrcodeInstance.append(container);
-      console.log('[葵花码] 生成成功');
+      console.log('[二维码] 生成成功');
     } catch(e) {
-      console.error('[葵花码] 生成失败:', e);
-      container.innerHTML = '<div style="text-align:center;color:var(--red);padding:20px;">二维码生成失败: ' + e.message + '</div>';
+      console.error('[二维码] 生成失败:', e);
+      container.innerHTML = '<div style="text-align:center;color:var(--red);padding:20px;">二维码生成失败</div>';
     }
   } else {
-    console.error('[葵花码] QRCodeStyling 未定义，请检查 CDN 是否加载成功');
-    container.innerHTML = '<div style="text-align:center;color:var(--red);padding:20px;">二维码库加载失败，可能是网络问题</div>';
+    console.error('[二维码] QRCode 未定义');
+    container.innerHTML = '<div style="text-align:center;color:var(--red);padding:20px;">二维码库加载失败</div>';
   }
 }
 
 function downloadQRCode() {
   const container = document.getElementById('qrcode-container');
   const canvas = container.querySelector('canvas');
+  const img = container.querySelector('img');
+  
   if (canvas) {
     const link = document.createElement('a');
-    link.download = '人生测评葵花码_' + currentShareName + '.png';
+    link.download = '人生测评二维码_' + currentShareName + '.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
-    showToast('葵花码已下载');
+    showToast('二维码已下载');
+  } else if (img) {
+    const link = document.createElement('a');
+    link.download = '人生测评二维码_' + currentShareName + '.png';
+    link.href = img.src;
+    link.click();
+    showToast('二维码已下载');
   } else {
     showToast('请先生成二维码');
   }
