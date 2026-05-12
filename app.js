@@ -290,10 +290,10 @@ function drawRadar(dimScores) {
     ctx.stroke();
 
     if (ring % 2 === 0) {
-      ctx.fillStyle = 'rgba(90,104,153,0.5)';
-      ctx.font = '11px sans-serif';
+      ctx.fillStyle = 'rgba(90,104,153,0.8)';
+      ctx.font = 'bold 14px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(ring * 20, cx + 6, cy - R * ring / 5 + 4);
+      ctx.fillText(ring * 20, cx + 8, cy - R * ring / 5 + 5);
     }
   }
 
@@ -338,17 +338,17 @@ function drawRadar(dimScores) {
 
   dims.forEach((d, i) => {
     const a = angles[i];
-    const labelR = R + 42;
+    const labelR = R + 45;
     const x = cx + Math.cos(a) * labelR;
     const y = cy + Math.sin(a) * labelR;
     ctx.fillStyle = DIMENSIONS[d].color;
-    ctx.font = 'bold 12px sans-serif';
+    ctx.font = 'bold 15px sans-serif';
     ctx.textAlign = Math.abs(Math.cos(a)) < 0.1 ? 'center' : (Math.cos(a) > 0 ? 'left' : 'right');
     ctx.textBaseline = 'middle';
     ctx.fillText(DIMENSIONS[d].icon + ' ' + DIMENSIONS[d].name, x, y);
-    ctx.fillStyle = 'rgba(90,104,153,0.7)';
-    ctx.font = '11px sans-serif';
-    ctx.fillText(dimScores[d] + '分', x, y + 18);
+    ctx.fillStyle = 'rgba(90,104,153,0.9)';
+    ctx.font = 'bold 13px sans-serif';
+    ctx.fillText(dimScores[d] + '分', x, y + 20);
   });
 }
 
