@@ -61,7 +61,6 @@ function showChangeKey() {
     return;
   }
   setKey(newKey).then(() => {
-    document.getElementById('default-key').textContent = '******';
     showToast('密钥已修改，请记住新密钥！');
   });
 }
