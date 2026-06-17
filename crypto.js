@@ -23,15 +23,16 @@ function getSavedKeyHash() {
   return localStorage.getItem('life_model_key_hash') || '';
 }
 
+// 检查是否首次使用（尚未设置管理员密钥）
+function needsInitialSetup() {
+  return !localStorage.getItem('life_model_key_hash');
+}
+
 // 验证密钥
 async function verifyKey(inputKey) {
   const hash = await sha256(inputKey + CRYPTO_KEY);
   const savedHash = getSavedKeyHash();
-  // 如果从未设置过，使用默认密钥
-  if (!savedHash) {
-    const defaultHash = await sha256('admin2026' + CRYPTO_KEY);
-    return hash === defaultHash;
-  }
+  if (!savedHash) return false;
   return hash === savedHash;
 }
 
@@ -39,6 +40,17 @@ async function verifyKey(inputKey) {
 async function setKey(newKey) {
   const hash = await sha256(newKey + CRYPTO_KEY);
   localStorage.setItem('life_model_key_hash', hash);
+}
+
+// 首次设置管理员密钥
+async function setupInitialKey(newKey) {
+  if (newKey.length < 6) {
+    return { success: false, error: '密钥长度至少6位' };
+  }
+  await setKey(newKey);
+  sessionStorage.setItem('life_admin_auth', '1');
+  sessionStorage.setItem('life_admin_login_time', new Date().toLocaleString('zh-CN'));
+  return { success: true };
 }
 
 // 显示修改密钥弹窗
@@ -52,6 +64,36 @@ function showChangeKey() {
     document.getElementById('default-key').textContent = '******';
     showToast('密钥已修改，请记住新密钥！');
   });
+}
+
+// 首次设置密钥表单提交
+async function doSetupKey() {
+  const keyEl = document.getElementById('setup-key');
+  const confirmEl = document.getElementById('setup-key-confirm');
+  const errorEl = document.getElementById('setup-error');
+  const key = keyEl.value.trim();
+  const confirm = confirmEl.value.trim();
+
+  if (!key || key.length < 6) {
+    errorEl.textContent = '密钥长度至少6位';
+    errorEl.classList.add('show');
+    return;
+  }
+  if (key !== confirm) {
+    errorEl.textContent = '两次输入的密钥不一致';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  const result = await setupInitialKey(key);
+  if (result.success) {
+    showToast('密钥已设置！请牢记您的密钥');
+    renderAdmin();
+    showPage('page-admin');
+  } else {
+    errorEl.textContent = result.error;
+    errorEl.classList.add('show');
+  }
 }
 
 // 登录
@@ -94,11 +136,17 @@ function goLogin() {
   if (isLoggedIn()) {
     renderAdmin();
     showPage('page-admin');
+  } else if (needsInitialSetup()) {
+    showPage('page-setup');
+    document.getElementById('setup-key').value = '';
+    document.getElementById('setup-key-confirm').value = '';
+    document.getElementById('setup-error').classList.remove('show');
+    setTimeout(() => document.getElementById('setup-key').focus(), 100);
   } else {
     showPage('page-login');
     document.getElementById('login-key').value = '';
     document.getElementById('login-error').classList.remove('show');
-    document.getElementById('login-key').focus();
+    setTimeout(() => document.getElementById('login-key').focus(), 100);
   }
 }
 

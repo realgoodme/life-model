@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>scoring.js 单元测试</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'PingFang SC','Microsoft YaHei',sans-serif; background: #0F1428; color: #E0E6FF; padding: 40px 20px; }
+  h1 { text-align: center; color: #5B7FFF; margin-bottom: 8px; }
+  .subtitle { text-align: center; color: #5A6899; font-size: 13px; margin-bottom: 24px; }
+  .summary { text-align: center; margin-bottom: 32px; padding: 16px; border-radius: 12px; font-size: 18px; font-weight: bold; }
+  .summary.pass { background: rgba(61,217,160,0.1); color: #3DD9A0; border: 1px solid rgba(61,217,160,0.3); }
+  .summary.fail { background: rgba(255,107,138,0.1); color: #FF6B8A; border: 1px solid rgba(255,107,138,0.3); }
+  .tests { max-width: 800px; margin: 0 auto; }
+  .test { background: #1A2040; border-radius: 10px; padding: 16px 20px; margin-bottom: 10px; border-left: 4px solid #5B7FFF; }
+  .test.pass { border-left-color: #3DD9A0; }
+  .test.fail { border-left-color: #FF6B8A; }
+  .test-name { font-weight: bold; margin-bottom: 4px; }
+  .test-result { font-size: 13px; margin-top: 6px; }
+  .test-result .ok { color: #3DD9A0; }
+  .test-result .bad { color: #FF6B8A; }
+  .test-result code { background: #0F1428; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  .section-title { color: #5B7FFF; font-size: 16px; font-weight: bold; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(91,127,255,0.2); }
+</style>
+</head>
+<body>
+
+<h1>🧪 scoring.js 单元测试</h1>
+<p class="subtitle">测试评分引擎、等级划分、预测函数、数据编解码</p>
+<div class="summary" id="summary">Running...</div>
+<div class="tests" id="tests"></div>
+
+<script src="questions.js"></script>
+<script src="scoring.js"></script>
+<script>
+(function() {
+  var pass = 0, fail = 0;
+  var html = '';
+  var section = '';
+
+  function sectionTitle(title) {
+    html += '<div class="section-title">' + title + '</div>';
+  }
+
+  function assert(name, condition, detail) {
+    if (condition) {
+      pass++;
+      html += '<div class="test pass"><div class="test-name">✅ ' + name + '</div></div>';
+    } else {
+      fail++;
+      html += '<div class="test fail"><div class="test-name">❌ ' + name + '</div><div class="test-result">' + (detail || '') + '</div></div>';
+    }
+  }
+
+  function assertEquals(name, actual, expected) {
+    var ok = actual === expected;
+    if (ok) {
+      pass++;
+      html += '<div class="test pass"><div class="test-name">✅ ' + name + '</div><div class="test-result"><span class="ok">' + JSON.stringify(actual) + '</span></div></div>';
+    } else {
+      fail++;
+      html += '<div class="test fail"><div class="test-name">❌ ' + name + '</div><div class="test-result">expected: <code>' + JSON.stringify(expected) + '</code> → got: <code class="bad">' + JSON.stringify(actual) + '</code></div></div>';
+    }
+  }
+
+  // Build answer maps
+  function buildAnswers(score) {
+    var a = {};
+    for (var i = 0; i < QUESTIONS.length; i++) {
+      a[QUESTIONS[i].id] = score;
+    }
+    return a;
+  }
+
+  // ==================== Test 1: calcScores ====================
+  sectionTitle('1. calcScores — 边界值测试');
+
+  // All answers = 5
+  var r5 = calcScores(buildAnswers(5));
+  Object.keys(r5.dimScores).forEach(function(d) {
+    assertEquals('全5分 ' + d + ' 维度分=100', r5.dimScores[d], 100);
+  });
+  assertEquals('全5分 总分=100', r5.total, 100);
+
+  // All answers = 3
+  var r3 = calcScores(buildAnswers(3));
+  // Each dim: round((count*3)/(count*5)*100) = round(60) = 60
+  assertEquals('全3分 birth维度分=60', r3.dimScores.birth, 60);
+  assertEquals('全3分 总分=60', r3.total, 60);
+
+  // All answers = 1
+  var r1 = calcScores(buildAnswers(1));
+  var dimCounts = { birth: 14, family: 14, talent: 14, character: 14, era: 12, health: 12, action: 12 };
+  Object.keys(dimCounts).forEach(function(d) {
+    var expected = Math.round((dimCounts[d] * 1) / (dimCounts[d] * 5) * 100);
+    assertEquals('全1分 ' + d + ' 维度分=' + expected, r1.dimScores[d], expected);
+  });
+  assertEquals('全1分 总分=' + Math.round(20), r1.total, Math.round(20));
+
+  // Predictions exist
+  var predKeys = ['income','class','unemployment','marriage','careerCeil','stability','startup','stress','promotion','resilience','healthScore','actionScore'];
+  predKeys.forEach(function(k) {
+    assert('prediction.' + k + ' 存在', typeof r3.predictions[k] === 'number', 'got: ' + typeof r3.predictions[k]);
+  });
+
+  // ==================== Test 2: getLevel thresholds ====================
+  sectionTitle('2. getLevel — 等级阈值边界');
+
+  assertEquals('total=88 → S', getLevel(88).level, 'S');
+  assertEquals('total=87 → A+', getLevel(87).level, 'A+');
+  assertEquals('total=76 → A+', getLevel(76).level, 'A+');
+  assertEquals('total=75 → A', getLevel(75).level, 'A');
+  assertEquals('total=63 → A', getLevel(63).level, 'A');
+  assertEquals('total=62 → B+', getLevel(62).level, 'B+');
+  assertEquals('total=50 → B+', getLevel(50).level, 'B+');
+  assertEquals('total=49 → B', getLevel(49).level, 'B');
+  assertEquals('total=38 → B', getLevel(38).level, 'B');
+  assertEquals('total=37 → C', getLevel(37).level, 'C');
+  assertEquals('total=0 → C', getLevel(0).level, 'C');
+
+  // Level metadata
+  var levelS = getLevel(90);
+  assert('S级 name="天选之人"', levelS.name === '天选之人');
+  assert('S级 percentile 存在', typeof levelS.percentile === 'string');
+  assert('S级 tag 存在', typeof levelS.tag === 'string');
+
+  // ==================== Test 3: incomeRange ====================
+  sectionTitle('3. incomeRange — 收入区间阈值');
+
+  assertEquals('incomeRange(80) → 高收入', incomeRange(80).detail, '高收入');
+  assertEquals('incomeRange(79) → 中高收入', incomeRange(79).detail, '中高收入');
+  assertEquals('incomeRange(60) → 中高收入', incomeRange(60).detail, '中高收入');
+  assertEquals('incomeRange(59) → 中等收入', incomeRange(59).detail, '中等收入');
+  assertEquals('incomeRange(40) → 中等收入', incomeRange(40).detail, '中等收入');
+  assertEquals('incomeRange(39) → 中低收入', incomeRange(39).detail, '中低收入');
+  assert('incomeRange 返回含 desc 字段', typeof incomeRange(50).desc === 'string');
+  assert('incomeRange 返回含 color 字段', typeof incomeRange(50).color === 'string');
+
+  // ==================== Test 4: careerCeilDesc ====================
+  sectionTitle('4. careerCeilDesc — 职场上限阈值');
+
+  assertEquals('careerCeilDesc(75) → 高层管理/专家', careerCeilDesc(75).label, '高层管理/专家');
+  assertEquals('careerCeilDesc(74) → 中层管理者', careerCeilDesc(74).label, '中层管理者');
+  assertEquals('careerCeilDesc(55) → 中层管理者', careerCeilDesc(55).label, '中层管理者');
+  assertEquals('careerCeilDesc(54) → 基层骨干', careerCeilDesc(54).label, '基层骨干');
+  assertEquals('careerCeilDesc(35) → 基层骨干', careerCeilDesc(35).label, '基层骨干');
+  assertEquals('careerCeilDesc(34) → 基础岗位', careerCeilDesc(34).label, '基础岗位');
+
+  // ==================== Test 5: marriageDesc ====================
+  sectionTitle('5. marriageDesc — 婚恋预测阈值');
+
+  assertEquals('marriageDesc(65).label → 婚恋潜力优秀', marriageDesc(65).label, '婚恋潜力优秀');
+  assertEquals('marriageDesc(64).label → 婚恋潜力中等', marriageDesc(64).label, '婚恋潜力中等');
+  assertEquals('marriageDesc(45).label → 婚恋潜力中等', marriageDesc(45).label, '婚恋潜力中等');
+  assertEquals('marriageDesc(44).label → 需主动拓展', marriageDesc(44).label, '需主动拓展');
+  assert('marriageDesc(65).prob → 高', marriageDesc(65).prob === '高');
+  assert('marriageDesc(45).prob → 中', marriageDesc(45).prob === '中');
+  assert('marriageDesc(30).prob → 低', marriageDesc(30).prob === '低');
+
+  // ==================== Test 6: classRange ====================
+  sectionTitle('6. classRange — 阶层预测阈值');
+
+  assert('classRange(90) 非空', typeof classRange(90) === 'string' && classRange(90).length > 0);
+  assert('classRange(50) 非空', typeof classRange(50) === 'string' && classRange(50).length > 0);
+  assert('classRange(10) 非空', typeof classRange(10) === 'string' && classRange(10).length > 0);
+
+  // ==================== Test 7: encode/decode roundtrip ====================
+  sectionTitle('7. encodeShareData / decodeShareData 往返测试');
+
+  var sample = {
+    dimScores: { birth: 60, family: 55, talent: 72, character: 48, era: 65, health: 70, action: 52 },
+    total: 58,
+    predictions: { income: 62, class: 55, unemployment: 40, marriage: 50, careerCeil: 45, stability: 50, startup: 35, stress: 45, promotion: 40, resilience: 48, healthScore: 65, actionScore: 50 }
+  };
+
+  var encoded = encodeShareData(sample, '测试用户');
+  assert('encodeShareData 返回非空字符串', typeof encoded === 'string' && encoded.length > 0);
+
+  var decoded = decodeShareData(encoded);
+  assert('decodeShareData 成功解析', decoded !== null);
+  assertEquals('往返: 用户名', decoded.n, '测试用户');
+  assertEquals('往返: 总分', decoded.t, 58);
+  assertEquals('往返: birth维度', decoded.d.birth, 60);
+
+  // Edge: decode bad data
+  var badDecoded = decodeShareData('!!!not-valid-base64!!!');
+  assert('decodeShareData 无效数据返回 null', badDecoded === null);
+
+  // ==================== Test 8: generateAnalysis / generateSuggestions / generateProbTimeline ====================
+  sectionTitle('8. 分析/建议/时间线生成');
+
+  var result = { total: 58, dimScores: sample.dimScores, predictions: sample.predictions, level: 'B+', levelName: '中等偏上' };
+  var analysis = generateAnalysis(result);
+  assert('generateAnalysis 返回数组', Array.isArray(analysis));
+  assert('generateAnalysis 至少1个block', analysis.length >= 1);
+
+  var sugs = generateSuggestions(result);
+  assert('generateSuggestions 返回数组', Array.isArray(sugs));
+  assert('generateSuggestions 至少1条', sugs.length >= 1);
+
+  var timeline = generateProbTimeline(result);
+  assert('generateProbTimeline 返回字符串', typeof timeline === 'string');
+  assert('generateProbTimeline 非空', timeline.length > 0);
+
+  // ==================== Test 9: getShareUrl ====================
+  sectionTitle('9. getShareUrl');
+
+  var url = getShareUrl(sample, '测试用户');
+  assert('getShareUrl 返回字符串', typeof url === 'string');
+  assert('getShareUrl 包含 ?share=', url.indexOf('?share=') > -1);
+
+  // ==================== Summary ====================
+  var total = pass + fail;
+  var summaryEl = document.getElementById('summary');
+  summaryEl.textContent = pass + '/' + total + ' 测试通过';
+  summaryEl.className = 'summary ' + (fail === 0 ? 'pass' : 'fail');
+
+  document.getElementById('tests').innerHTML = html;
+})();
+</script>
+
+</body>
+</html>
